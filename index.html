@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <title>Trading Session Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <meta name="description" content="Track your trading session habits with Angels and Demons">
+</head>
+<body>
+    <div class="container">
+        <div class="points-display">
+            Points: <span id="pointsValue" class="points-positive">0</span> <span id="moneySymbols"></span>
+        </div>
+
+        <div id="pointsMessage" class="points-message"></div>
+
+        <div class="table-header">
+            👼 ANGELS 👼
+        </div>
+
+        <div class="table-header">
+            😈 DEMONS 😈
+        </div>
+
+        <div class="trading-log">
+            <div class="log-header">
+                <span class="log-title">Trading Log</span> Total Events: <span id="log-counter">0</span>
+            </div>
+            <div id="tradingLogList" class="log-list"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

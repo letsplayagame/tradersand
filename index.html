@@ -3,453 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITG CoPilot - Trading Session</title>
+    <title>Trading Log</title>
     <style>
-        :root {
-            --primary-green: #8BA888;
-            --warm-gray: #9B8E83;
-            --terra-cotta: #E2725B;
-            --light-sand: #F4F1EA;
-            --dark-gray: #2C3639;
-            --status-green: #7FA084;
-            --status-yellow: #D4B483;
-            --status-red: #C1666B;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: var(--light-sand);
-            color: var(--dark-gray);
-            line-height: 1.6;
-        }
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 10px;
-        }
-        .points-display {
-            text-align: center;
-            padding: 10px;
-            font-size: 2em;
-            font-weight: bold;
-        }
-        .points-message {
-            text-align: center;
-            padding: 8px;
-            font-size: 1.2em;
-            font-weight: 500;
-            margin: 5px 0;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-        .message-warning {
-            background: rgba(193, 102, 107, 0.1);
-            color: var(--status-red);
-        }
-        .message-success {
-            background: rgba(127, 160, 132, 0.1);
-            color: var(--status-green);
-        }
-        .message-danger {
-            background: var(--status-red);
-            color: white;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            50% { opacity: 0.8; }
-        }
-        .points-positive { color: var(--status-green); }
-        .points-negative { color: var(--status-red); }
-        .table-header {
-            text-align: center;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin: 15px 0 5px;
-            padding: 5 px;
-            background: #f8f8f8;
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-        }
-        .table-header .emoji { font-size: 1.2em; }
-        .angels-table, .demons-table {
-            width: 100%;
-            margin-bottom: 20px;
-            border-collapse: collapse;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .angels-table th, .demons-table th,
-        .angels-table td, .demons-table td {
-            border: 1px solid #ddd;
-            padding: 6px;
-        }
-        .angels-table th, .demons-table th {
-            background-color: #f8f8f8;
-            text-align: center;
-            font-weight: 600;
-        }
-        .action-cell {
-            font-weight: 500;
-            padding: 6px 12px;
-             white-space: nowrap;       /* Prevents text wrapping */
-    overflow: hidden;          /* Hides overflow content */
-    text-overflow: ellipsis;
-        }
-        .angels-table .action-cell {
-    max-width: 200px;          /* Adjust this value as needed */
-}
-
-        .angels-table .action-cell:hover {
-    position: relative;
-}
-
-.angels-table .action-cell:hover::after {
-    content: attr(title);
-    position: absolute;
-    left: 0;
-    top: 100%;
-    background: white;
-    padding: 5px 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    z-index: 1000;
-}
-        
-        .checkmark-cell {
-            width: 32px;
-            height: 24px;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .checkmark-cell:hover { background-color: #f5f5f5; }
-        .checkmark-cell.marked {
-            background-color: var(--primary-green);
-            color: white;
-        }
-        .checkmark-cell.disabled {
-            background-color: #f5f5f5;
-            cursor: not-allowed;
-        }
-        .row-limit-reached {
-            background-color: rgba(193, 102, 107, 0.2);
-        }
-        .trading-log {
-            width: 100%;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-top: 30px;
             padding: 20px;
         }
+
+        .points-display {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .points-positive {
+            color: green;
+        }
+
+        .points-negative {
+            color: red;
+        }
+
+        .points-message {
+            text-align: center;
+            margin: 10px 0;
+            min-height: 20px;
+        }
+
+        .table-header {
+            text-align: center;
+            font-size: 20px;
+            margin: 15px 0;
+        }
+
+        .trading-log {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
         .log-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
+            margin-bottom: 10px;
         }
+
         .log-title {
-            font-size: 1.4em;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: bold;
         }
+
         .log-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
+
         .log-item {
-            display: grid;
-            grid-template-columns: 80px 30px auto 300px 100px;
-            gap: 15px;
+            display: flex;
             align-items: center;
-            padding: 10px;
+            gap: 10px;
+            padding: 5px;
             border-bottom: 1px solid #eee;
         }
+
         .log-time {
-            color: var(--warm-gray);
-            font-size: 0.9em;
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
         }
+
         .log-emoji {
-            font-size: 1.2em;
+            font-size: 18px;
+            width: 24px;
             text-align: center;
         }
-        .log-note {
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.9em;
-            width: 100%;
+
+        .log-name {
+            flex: 0 0 100px;
         }
+
+        .log-note {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
         .log-checkbox {
             display: flex;
             align-items: center;
             gap: 5px;
-            justify-content: flex-end;
         }
-        .log-checkbox input { margin: 0; }
-        .action-cell.clickable {
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.action-cell.clickable:hover {
-    background-color: #f5f5f5;
-}
     </style>
 </head>
-
-    <body>
+<body>
     <div class="container">
         <div class="points-display">
-            Points: <span id="pointsValue" class="points-positive">0</span>
-            <span id="moneySymbols"></span>
+            Points: <span id="pointsValue" class="points-positive">0</span> <span id="moneySymbols"></span>
         </div>
-        <div id="pointsMessage" class="points-message"></div>
+
+        <div id="pointsMessage" class="points-message">
+        </div>
 
         <div class="table-header">
-            <span class="emoji">👼</span>
-            ANGELS
-            <span class="emoji">👼</span>
+            👼 ANGELS 👼
         </div>
-        <table class="angels-table">
-            <tbody id="angelsTableBody">
-            </tbody>
-        </table>
 
         <div class="table-header">
-            <span class="emoji">😈</span>
-            DEMONS
-            <span class="emoji">😈</span>
+            😈 DEMONS 😈
         </div>
-        <table class="demons-table">
-         
-            <tbody id="demonsTableBody">
-            </tbody>
-        </table>
 
         <div class="trading-log">
             <div class="log-header">
-                <span class="log-title">Trading Log</span>
-                <span>Total Events: <span id="log-counter">0</span></span>
+                <span class="log-title">Trading Log</span> Total Events: <span id="log-counter">0</span>
             </div>
-            <div class="log-list" id="tradingLogList">
+            <div id="tradingLogList" class="log-list">
             </div>
         </div>
     </div>
 
     <script>
-        const angels = [
-            { name: 'Fantastic Entry', multiplier: 3, maxCells: 12, marks: 0 },
-            { name: 'Textbook Setup', multiplier: 2, maxCells: 12, marks: 0 },
-            { name: 'Sit on Hands', multiplier: 1, maxCells: 12, marks: 0 },
-            { name: 'Took a regen break', multiplier: 1, maxCells: 12, marks: 0 }
-        ];
-
-        const demons = [
-            { name: 'FOMO/Chase Entry', multiplier: 1, maxCells: 6, marks: 0 },
-            { name: 'Boredom/No Setup Entry', multiplier: 2, maxCells: 3, marks: 0 },
-            { name: 'Hesitated/Missed Entry', multiplier: 1, maxCells: 6, marks: 0 },
-            { name: 'Missed Critical Signal', multiplier: 1, maxCells: 6, marks: 0 },
-            { name: 'Poor RR', multiplier: 1, maxCells: 6, marks: 0 },
-            { name: 'Let a big loser', multiplier: 3, maxCells: 2, marks: 0 },
-            { name: 'Premature Exit', multiplier: 1, maxCells: 6, marks: 0 },
-            { name: 'Late Exit', multiplier: 1, maxCells: 6, marks: 0 }
-        ];
-
         let tradingLog = [];
-        let totalPoints = 0;
-        let previousPoints = 0;
-
-        const pointsMessages = {
-            '-18': { text: 'Margin called, they want their account back', class: 'message-danger' },
-            '-12': { text: 'Today is not the day. Stop trading!', class: 'message-danger' },
-            '-6': { text: 'P&L in danger. Take a break!', class: 'message-warning' },
-            '6': { text: 'Good job! You are killing it', class: 'message-success' },
-            '12': { text: 'Hey leave some money for the others', class: 'message-success' },
-            '18': { text: 'Taxman will be rich', class: 'message-success' }
-        };
-
-        function getCurrentTime() {
-            return new Intl.DateTimeFormat('en-US', {
-                timeZone: 'America/New_York',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            }).format(new Date());
-        }
-
-        function updatePoints(value) {
-            previousPoints = totalPoints;
-            totalPoints += value;
-            
-            const pointsDisplay = document.getElementById('pointsValue');
-            pointsDisplay.textContent = totalPoints;
-            pointsDisplay.className = totalPoints >= 0 ? 'points-positive' : 'points-negative';
-
-            updatePointsMessage();
-            updateMoneySymbols();
-        }
-
-        function updatePointsMessage() {
-            const messageDiv = document.getElementById('pointsMessage');
-            
-            if (totalPoints === 0) {
-                if (previousPoints < 0) {
-                    messageDiv.textContent = "Back in business!";
-                    messageDiv.className = "points-message message-success";
-                    return;
-                } else if (previousPoints > 0) {
-                    messageDiv.textContent = "Bro, what's happening?";
-                    messageDiv.className = "points-message message-warning";
-                    return;
-                }
-            }
-
-            for (const threshold of [-18, -12, -6, 6, 12, 18]) {
-                if (
-                    (previousPoints < threshold && totalPoints >= threshold) ||
-                    (previousPoints >= threshold && totalPoints < threshold)
-                ) {
-                    if (pointsMessages[threshold]) {
-                        messageDiv.textContent = pointsMessages[threshold].text;
-                        messageDiv.className = `points-message ${pointsMessages[threshold].class}`;
-                        return;
-                    }
-                }
-            }
-        }
-
-        function updateMoneySymbols() {
-            const symbolsSpan = document.getElementById('moneySymbols');
-            const moneyCount = Math.floor(Math.max(0, totalPoints) / 6);
-            symbolsSpan.textContent = '💰'.repeat(moneyCount);
-        }
-
-function createAngelsTable() {
-    const tbody = document.getElementById('angelsTableBody');
-    tbody.innerHTML = '';
-
-    angels.forEach((angel, rowIndex) => {
-        const row = document.createElement('tr');
-        
-        const actionCell = document.createElement('td');
-        actionCell.className = 'action-cell clickable';
-        actionCell.textContent = `${angel.name} (${angel.multiplier})`;
-        actionCell.title = `${angel.name} (${angel.multiplier})`; 
-        actionCell.onclick = () => markAngel(rowIndex);
-        row.appendChild(actionCell);
-
-        for (let i = 0; i < angel.maxCells; i++) {
-            const cell = document.createElement('td');
-            cell.className = 'checkmark-cell';
-            cell.textContent = i < angel.marks ? '✓' : '';
-            row.appendChild(cell);
-        }
-
-        tbody.appendChild(row);
-    });
-}
-
-        function createDemonsTable() {
-    const tbody = document.getElementById('demonsTableBody');
-    tbody.innerHTML = '';
-
-    demons.forEach((demon, rowIndex) => {
-        const row = document.createElement('tr');
-        row.className = demon.marks >= demon.maxCells ? 'row-limit-reached' : '';
-        
-        // Action cell becomes clickable
-        const actionCell = document.createElement('td');
-        actionCell.className = 'action-cell clickable';
-        actionCell.textContent = `${demon.name} (${demon.multiplier})`;
-        actionCell.onclick = () => markDemon(rowIndex);
-        row.appendChild(actionCell);
-
-        // Handle merged cells for multipliers 2 and 3
-        if (demon.multiplier >= 2) {
-            // Create merged cells
-            const totalGroups = demon.maxCells;
-            for (let i = 0; i < totalGroups; i++) {
-                const cell = document.createElement('td');
-                cell.className = 'checkmark-cell';
-                cell.colSpan = demon.multiplier;
-                cell.textContent = i < demon.marks ? '✓' : '';
-                row.appendChild(cell);
-            }
-            // Add remaining empty cells
-            for (let i = totalGroups * demon.multiplier; i < 6; i++) {
-                const cell = document.createElement('td');
-                cell.className = 'checkmark-cell disabled';
-                row.appendChild(cell);
-            }
-        } else {
-            // Regular cells for multiplier 1
-            for (let i = 0; i < 6; i++) {
-                const cell = document.createElement('td');
-                cell.className = 'checkmark-cell';
-                cell.textContent = i < demon.marks ? '✓' : '';
-                row.appendChild(cell);
-            }
-        }
-
-        tbody.appendChild(row);
-    });
-}
-        
-        function markAngel(rowIndex) {
-    const angel = angels[rowIndex];
-    if (angel.marks < angel.maxCells) {
-        angel.marks++;
-        updatePoints(angel.multiplier);
-        addToLog(angel.name, true);
-        createAngelsTable();
-    }
-}
-
-        function markDemon(rowIndex) {
-    const demon = demons[rowIndex];
-    if (demon.marks < demon.maxCells) {
-        demon.marks++;
-        updatePoints(-demon.multiplier);
-        addToLog(demon.name, false);
-        createDemonsTable();
-    }
-}
-
-        function addToLog(action, isAngel) {
-            const logEntry = {
-                time: getCurrentTime(),
-                action: action,
-                isAngel: isAngel,
-                lucky: false,
-                note: '',
-                id: Date.now()
-            };
-            
-            tradingLog.unshift(logEntry);
-            updateLogDisplay();
-        }
 
         function updateLogDisplay() {
             const logList = document.getElementById('tradingLogList');
             logList.innerHTML = '';
             document.getElementById('log-counter').textContent = tradingLog.length;
-
             tradingLog.forEach(entry => {
                 const logItem = document.createElement('div');
                 logItem.className = 'log-item';
                 logItem.innerHTML = `
-                    <span class="log-time">${entry.time}</span>
+                    <input type="text" class="log-time"
+                           value="${entry.time}"
+                           onchange="updateLogTime(${entry.id}, this.value)">
                     <span class="log-emoji">${entry.isAngel ? '👼' : '😈'}</span>
                     <span class="log-name">${entry.action}</span>
                     <input type="text" class="log-note" 
@@ -468,38 +160,41 @@ function createAngelsTable() {
             });
         }
 
-        function updateLogNote(id, note) {
-            const entry = tradingLog.find(e => e.id === id);
+        function saveToLocalStorage() {
+            localStorage.setItem('tradingLog', JSON.stringify(tradingLog));
+        }
+
+        function updateLogTime(id, newTime) {
+            const entry = tradingLog.find(entry => entry.id === id);
             if (entry) {
-                entry.note = note;
+                entry.time = newTime;
+                saveToLocalStorage();
             }
         }
 
-        function updateLogLucky(id, lucky) {
-            const entry = tradingLog.find(e => e.id === id);
+        function updateLogNote(id, newNote) {
+            const entry = tradingLog.find(entry => entry.id === id);
             if (entry) {
-                entry.lucky = lucky;
+                entry.note = newNote;
+                saveToLocalStorage();
             }
         }
 
-        function resetAll() {
-            angels.forEach(angel => angel.marks = 0);
-            demons.forEach(demon => demon.marks = 0);
-            tradingLog = [];
-            totalPoints = 0;
-            previousPoints = 0;
-            
-            createAngelsTable();
-            createDemonsTable();
-            updateLogDisplay();
-            updatePoints(0);
+        function updateLogLucky(id, isLucky) {
+            const entry = tradingLog.find(entry => entry.id === id);
+            if (entry) {
+                entry.lucky = isLucky;
+                saveToLocalStorage();
+            }
         }
 
+        // Load saved data when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            createAngelsTable();
-            createDemonsTable();
-            updateLogDisplay();
-            updatePoints(0);
+            const savedLog = localStorage.getItem('tradingLog');
+            if (savedLog) {
+                tradingLog = JSON.parse(savedLog);
+                updateLogDisplay();
+            }
         });
     </script>
 </body>

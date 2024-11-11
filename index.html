@@ -92,6 +92,28 @@
 
         .config-screen {
             display: none;
+            padding: 20px;
+        }
+        
+        .config-section {
+            margin-bottom: 30px;
+        }
+        
+        .config-section h3 {
+            margin-bottom: 10px;
+        }
+        
+        #angels-config, #demons-config {
+            margin-bottom: 10px;
+        }
+        
+        .config-screen input {
+            width: 100%;
+            padding: 5px;
+        }
+        
+        .config-screen input[type="number"] {
+            width: 80px;
         }
 
         .screen-toggle {
@@ -227,7 +249,7 @@
 </body>
 
 
-    <script>
+ <script>
     // Constants
     const STORAGE_KEYS = {
         ANGELS: 'tradersand_angels',
@@ -241,9 +263,22 @@
         PM: { start: '12:00', end: '16:00', message: 'PM Session' }
     };
 
+    // Default configurations
+    const DEFAULT_ANGELS = [
+        { action: "A+ Entry", multiplier: 3, maxOccurrence: 3 },
+        { action: "Good Entry", multiplier: 2, maxOccurrence: 6 },
+        { action: "Sit on Hands", multiplier: 1, maxOccurrence: 6 }
+    ];
+
+    const DEFAULT_DEMONS = [
+        { action: "FOMO/Chase entry", multiplier: 1, maxOccurrence: 6 },
+        { action: "Hesitated/Missed Entry", multiplier: 1, maxOccurrence: 6 },
+        { action: "DCA to Death", multiplier: 3, maxOccurrence: 2 }
+    ];
+
     // State Management
-    let angels = JSON.parse(localStorage.getItem(STORAGE_KEYS.ANGELS)) || [];
-    let demons = JSON.parse(localStorage.getItem(STORAGE_KEYS.DEMONS)) || [];
+    let angels = JSON.parse(localStorage.getItem(STORAGE_KEYS.ANGELS)) || DEFAULT_ANGELS;
+    let demons = JSON.parse(localStorage.getItem(STORAGE_KEYS.DEMONS)) || DEFAULT_DEMONS;
     let logs = JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGS)) || [];
 
     // Helper Functions
@@ -476,10 +511,18 @@
     // Event Listeners
     document.querySelectorAll('.screen-toggle').forEach(button => {
         button.addEventListener('click', () => {
-            document.querySelector('.main-screen').style.display = 
-                document.querySelector('.main-screen').style.display === 'none' ? 'block' : 'none';
-            document.querySelector('.config-screen').style.display = 
-                document.querySelector('.config-screen').style.display === 'none' ? 'block' : 'none';
+            const mainScreen = document.querySelector('.main-screen');
+            const configScreen = document.querySelector('.config-screen');
+            
+            if (mainScreen.style.display === 'none') {
+                mainScreen.style.display = 'block';
+                configScreen.style.display = 'none';
+            } else {
+                mainScreen.style.display = 'none';
+                configScreen.style.display = 'block';
+            }
+            
+            renderConfigTables(); // Refresh config tables when switching screens
         });
     });
 

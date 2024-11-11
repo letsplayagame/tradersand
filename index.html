@@ -13,6 +13,7 @@
             --sage: #9CAF88;
             --success: #4F7942;
             --error: #8B0000;
+            --light-gray: #E0E0E0;
         }
 
         * {
@@ -31,16 +32,29 @@
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 20px;
             background-color: var(--light-brown);
             padding: 15px;
             border-radius: 5px;
         }
 
+        .score-container {
+            text-align: center;
+        }
+
         .score {
             font-size: 24px;
             font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-message {
+            font-size: 14px;
+            padding: 5px;
+            border-radius: 3px;
+            background-color: var(--sage);
+            color: white;
         }
 
         .score.positive { color: var(--success); }
@@ -57,12 +71,15 @@
             border-collapse: collapse;
             margin-bottom: 20px;
             background-color: white;
+            overflow-x: auto;
+            display: block;
         }
 
         th, td {
             border: 1px solid var(--light-brown);
             padding: 8px;
-            text-align: left;
+            text-align: center;
+            min-width: 30px;
         }
 
         th {
@@ -70,13 +87,35 @@
             color: var(--dark-brown);
         }
 
-        .action-btn {
+        .action-cell {
+            text-align: left;
             cursor: pointer;
-            padding: 5px 10px;
-            background-color: var(--sage);
-            border: none;
-            border-radius: 3px;
+            min-width: 150px;
+        }
+
+        .check-cell {
+            background-color: white;
+        }
+
+        .disabled-cell {
+            background-color: var(--light-gray);
+        }
+
+        .button-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .screen-toggle, .howto-toggle, .stats-toggle {
+            padding: 10px;
+            background-color: var(--primary-brown);
             color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
         .log-section {
@@ -90,36 +129,296 @@
             align-items: center;
         }
 
-        .config-screen {
+        .config-screen, .howto-screen, .stats-screen {
             display: none;
             padding: 20px;
         }
-        
-        .config-section {
-            margin-bottom: 30px;
-        }
-        
-        .config-section h3 {
-            margin-bottom: 10px;
-        }
-        
-        #angels-config, #demons-config {
-            margin-bottom: 10px;
-        }
-        
-        .config-screen input {
-            width: 100%;
-            padding: 5px;
-        }
-        
-        .config-screen input[type="number"] {
-            width: 80px;
+
+        .screen {
+            display: none;
         }
 
-        .screen-toggle {
+        .screen.active {
+            display: block;
+        }
+
+        .export-btn {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: var(--sage);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .button-container {
+                position: static;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-screen screen active">
+        <div class="button-container">
+            <button class="howto-toggle">How To</button>
+            <button class="stats-toggle">Stats</button>
+            <button class="config-toggle">Configuration</button>
+        </div>
+        
+        <div class="header">
+            <div class="ac-table">
+                <table>
+                    <tr>
+                        <th></th>
+                        <th>🍀</th>
+                        <th>😞</th>
+                    </tr>
+                    <tr>
+                        <td>💪</td>
+                        <td id="lucky-angels">0</td>
+                        <td id="unlucky-angels">0</td>
+                    </tr>
+                    <tr>
+                        <td>👎</td>
+                        <td id="lucky-demons">0</td>
+                        <td id="unlucky-demons">0</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="score-container">
+                <div class="score" id="total-score">Score: 0</div>
+                <div class="score-message" id="score-message"></div>
+            </div>
+            <div class="window">
+                <div id="ny-time"></div>
+                <div id="session-message"></div>
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <table id="angels-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th colspan="20">Occurrences</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <table id="demons-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th colspan="20">Occurrences</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="log-section">
+            <h2>Actions Log</h2>
+            <button id="clear-logs" class="action-btn">Clear All Logs</button>
+            <div id="log-entries"></div>
+        </div>
+    </div>
+
+    <div class="config-screen screen">
+        <div class="button-container">
+            <button class="main-toggle">Main Screen</button>
+        </div>
+        
+        <h2>Configuration</h2>
+        
+        <div class="config-section">
+            <h3>Angels Configuration</h3>
+            <table id="angels-config">
+                <thead>
+                    <tr>
+                        <th>Action Item</th>
+                        <th>Multiplier (1-5)</th>
+                        <th>Max Occurrence (2-20)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button id="add-angel" class="action-btn">Add Angel</button>
+        </div>
+
+        <div class="config-section">
+            <h3>Demons Configuration</h3>
+            <table id="demons-config">
+                <thead>
+                    <tr>
+                        <th>Action Item</th>
+                        <th>Multiplier (1-5)</th>
+                        <th>Max Occurrence (2-20)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button id="add-demon" class="action-btn">Add Demon</button>
+        </div>
+    </div>
+
+    <div class="howto-screen screen">
+        <div class="button-container">
+            <button class="main-toggle">Main Screen</button>
+        </div>
+        <h2>How to Use TradersAnD</h2>
+        <div class="howto-content">
+            <p>TradersAnD (Traders Angels and Demons) helps you track your trading behavior patterns. Click on actions to log them during your trading session. Angels represent good habits, while Demons represent behaviors to avoid. The score helps you gauge your performance, and the stats page provides insights into your trading patterns over time.</p>
+        </div>
+    </div>
+
+    <div class="stats-screen screen">
+        <div class="button-container">
+            <button class="main-toggle">Main Screen</button>
+        </div>
+        <h2>Statistics</h2>
+        
+        <h3>All Time</h3>
+        <div id="all-time-ac"></div>
+        
+        <h3>This Week</h3>
+        <div id="this-week-ac"></div>
+        
+        <h3>Today</h3>
+        <div id="today-ac"></div>
+
+        <button id="export-csv" class="export-btn">Export to CSV</button>
+        
+        <h3>History</h3>
+        <div id="history-logs"></div>
+    </div>
+</body>
+
+<script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradersAnD - Traders Angels and Demons</title>
+    <style>
+        :root {
+            --primary-brown: #8B4513;
+            --light-brown: #DEB887;
+            --dark-brown: #654321;
+            --beige: #F5F5DC;
+            --sage: #9CAF88;
+            --success: #4F7942;
+            --error: #8B0000;
+            --light-gray: #E0E0E0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--beige);
+            color: var(--dark-brown);
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            background-color: var(--light-brown);
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .score-container {
+            text-align: center;
+        }
+
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-message {
+            font-size: 14px;
+            padding: 5px;
+            border-radius: 3px;
+            background-color: var(--sage);
+            color: white;
+        }
+
+        .score.positive { color: var(--success); }
+        .score.negative { color: var(--error); }
+
+        .window {
+            background-color: var(--sage);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: white;
+            overflow-x: auto;
+            display: block;
+        }
+
+        th, td {
+            border: 1px solid var(--light-brown);
+            padding: 8px;
+            text-align: center;
+            min-width: 30px;
+        }
+
+        th {
+            background-color: var(--light-brown);
+            color: var(--dark-brown);
+        }
+
+        .action-cell {
+            text-align: left;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .check-cell {
+            background-color: white;
+        }
+
+        .disabled-cell {
+            background-color: var(--light-gray);
+        }
+
+        .button-container {
             position: fixed;
             top: 20px;
             right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .screen-toggle, .howto-toggle, .stats-toggle {
             padding: 10px;
             background-color: var(--primary-brown);
             color: white;
@@ -128,16 +427,50 @@
             cursor: pointer;
         }
 
-        input[type="text"], input[type="number"] {
-            padding: 5px;
-            border: 1px solid var(--light-brown);
-            border-radius: 3px;
+        .log-section {
+            margin-top: 20px;
         }
 
-        .warning {
-            color: var(--error);
-            font-size: 0.9em;
-            margin-top: 5px;
+        .log-entry {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+            align-items: center;
+        }
+
+        .config-screen, .howto-screen, .stats-screen {
+            display: none;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .export-btn {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: var(--sage);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .button-container {
+                position: static;
+                margin-bottom: 20px;
+            }
         }
     </style>
 </head>
@@ -282,10 +615,9 @@
     </div>
 </body>
 
+<script>
 
-    
- <script>
-    // Constants
+// Constants
 const STORAGE_KEYS = {
     ANGELS: 'tradersand_angels',
     DEMONS: 'tradersand_demons',
@@ -324,9 +656,7 @@ const DEFAULT_DEMONS = [
 let angels = JSON.parse(localStorage.getItem(STORAGE_KEYS.ANGELS)) || DEFAULT_ANGELS;
 let demons = JSON.parse(localStorage.getItem(STORAGE_KEYS.DEMONS)) || DEFAULT_DEMONS;
 let logs = JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGS)) || [];
-    
-     
-     
+
 // Helper Functions
 function saveState() {
     localStorage.setItem(STORAGE_KEYS.ANGELS, JSON.stringify(angels));
@@ -445,8 +775,7 @@ function exportToCSV() {
 }
 
 
-
-     // UI Rendering Functions
+// UI Rendering Functions
 function renderActionTables() {
     const angelsTable = document.getElementById('angels-table').getElementsByTagName('tbody')[0];
     const demonsTable = document.getElementById('demons-table').getElementsByTagName('tbody')[0];
@@ -561,11 +890,7 @@ function renderLogs() {
 }
 
 
-
-
-
-
-     function renderConfigTables() {
+function renderConfigTables() {
     const angelsConfig = document.getElementById('angels-config').getElementsByTagName('tbody')[0];
     const demonsConfig = document.getElementById('demons-config').getElementsByTagName('tbody')[0];
 
@@ -663,7 +988,7 @@ function updateStats() {
 
 
 
-     // Event Handlers
+// Event Handlers
 function addLogEntry(action, isAngel) {
     const count = logs.filter(log => log.action === action).length;
     const actionConfig = isAngel ? 
@@ -757,4 +1082,4 @@ updateStats();
 updateClock();
 setInterval(updateClock, 60000);
 
- </script>
+</script>

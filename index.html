@@ -799,10 +799,22 @@ function exportToCSV() {
 }
 
 
+
+
+
+
+
 // UI Rendering Functions
 function renderActionTables() {
+    console.log('Rendering action tables:', { angels, demons }); // Debug log
+    
     const angelsTable = document.getElementById('angels-table').getElementsByTagName('tbody')[0];
     const demonsTable = document.getElementById('demons-table').getElementsByTagName('tbody')[0];
+
+    if (!angelsTable || !demonsTable) {
+        console.error('Tables not found');
+        return;
+    }
 
     angelsTable.innerHTML = '';
     demonsTable.innerHTML = '';
@@ -812,6 +824,10 @@ function renderActionTables() {
         const actionCell = document.createElement('td');
         actionCell.className = 'action-cell';
         actionCell.textContent = action.action;
+        actionCell.addEventListener('click', (e) => {
+            e.stopPropagation();
+            addLogEntry(action.action, isAngel);
+        });
         row.appendChild(actionCell);
 
         const actionLogs = logs.filter(log => log.action === action.action);
@@ -831,17 +847,21 @@ function renderActionTables() {
             row.appendChild(cell);
         }
 
-        row.addEventListener('click', () => addLogEntry(action.action, isAngel));
         return row;
     }
 
-    angels.forEach(angel => {
-        angelsTable.appendChild(createActionRow(angel, true));
-    });
+    // Ensure we have data to render
+    if (angels && angels.length > 0) {
+        angels.forEach(angel => {
+            angelsTable.appendChild(createActionRow(angel, true));
+        });
+    }
 
-    demons.forEach(demon => {
-        demonsTable.appendChild(createActionRow(demon, false));
-    });
+    if (demons && demons.length > 0) {
+        demons.forEach(demon => {
+            demonsTable.appendChild(createActionRow(demon, false));
+        });
+    }
 }
 
 function updateScore() {
@@ -912,6 +932,13 @@ function renderLogs() {
         logContainer.appendChild(logEntry);
     });
 }
+
+
+
+
+
+
+
 
 
 function renderConfigTables() {

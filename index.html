@@ -91,6 +91,14 @@
             text-align: left;
             cursor: pointer;
             min-width: 150px;
+            background-color: var(--sage);
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        
+        .action-cell:hover {
+            background-color: var(--primary-brown);
         }
 
         .check-cell {
@@ -109,7 +117,7 @@
             gap: 10px;
         }
 
-        .screen-toggle, .howto-toggle, .stats-toggle {
+        .screen-toggle, .howto-toggle, .stats-toggle, .config-toggle, .main-toggle, .action-btn {
             padding: 10px;
             background-color: var(--primary-brown);
             color: white;
@@ -617,6 +625,8 @@
 
 <script>
 
+
+
 // Constants
 const STORAGE_KEYS = {
     ANGELS: 'tradersand_angels',
@@ -653,9 +663,23 @@ const DEFAULT_DEMONS = [
 ];
 
 // State Management
-let angels = JSON.parse(localStorage.getItem(STORAGE_KEYS.ANGELS)) || DEFAULT_ANGELS;
-let demons = JSON.parse(localStorage.getItem(STORAGE_KEYS.DEMONS)) || DEFAULT_DEMONS;
+let angels = JSON.parse(localStorage.getItem(STORAGE_KEYS.ANGELS));
+let demons = JSON.parse(localStorage.getItem(STORAGE_KEYS.DEMONS));
 let logs = JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGS)) || [];
+
+// Initialize default values if not exists
+if (!angels || angels.length === 0) {
+    angels = DEFAULT_ANGELS;
+    localStorage.setItem(STORAGE_KEYS.ANGELS, JSON.stringify(angels));
+}
+
+if (!demons || demons.length === 0) {
+    demons = DEFAULT_DEMONS;
+    localStorage.setItem(STORAGE_KEYS.DEMONS, JSON.stringify(demons));
+}
+
+
+
 
 // Helper Functions
 function saveState() {
@@ -988,6 +1012,7 @@ function updateStats() {
 
 
 
+
 // Event Handlers
 function addLogEntry(action, isAngel) {
     const count = logs.filter(log => log.action === action).length;
@@ -1016,10 +1041,13 @@ function addLogEntry(action, isAngel) {
 
 function showScreen(screenName) {
     document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.remove('active');
+        screen.style.display = 'none';
     });
-    document.querySelector(`.${screenName}-screen`).classList.add('active');
+    document.querySelector(`.${screenName}-screen`).style.display = 'block';
 }
+
+// Initialize main screen as visible
+document.querySelector('.main-screen').style.display = 'block';
 
 // Event Listeners
 document.querySelectorAll('.main-toggle').forEach(button => {
@@ -1081,5 +1109,7 @@ updateScore();
 updateStats();
 updateClock();
 setInterval(updateClock, 60000);
+
+
 
 </script>

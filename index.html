@@ -144,30 +144,37 @@
 
 
 <body>
-    <div class="main-screen">
-        <button class="screen-toggle">Configuration</button>
+    <div class="main-screen screen active">
+        <div class="button-container">
+            <button class="howto-toggle">How To</button>
+            <button class="stats-toggle">Stats</button>
+            <button class="config-toggle">Configuration</button>
+        </div>
         
         <div class="header">
             <div class="ac-table">
                 <table>
                     <tr>
                         <th></th>
-                        <th>Lucky</th>
-                        <th>Unlucky</th>
+                        <th>🍀</th>
+                        <th>😞</th>
                     </tr>
                     <tr>
-                        <td>Angels</td>
+                        <td>💪</td>
                         <td id="lucky-angels">0</td>
                         <td id="unlucky-angels">0</td>
                     </tr>
                     <tr>
-                        <td>Demons</td>
+                        <td>👎</td>
                         <td id="lucky-demons">0</td>
                         <td id="unlucky-demons">0</td>
                     </tr>
                 </table>
             </div>
-            <div class="score" id="total-score">Points: 0</div>
+            <div class="score-container">
+                <div class="score" id="total-score">Score: 0</div>
+                <div class="score-message" id="score-message"></div>
+            </div>
             <div class="window">
                 <div id="ny-time"></div>
                 <div id="session-message"></div>
@@ -175,31 +182,25 @@
         </div>
 
         <div class="actions-section">
-            <div class="angels-section">
-                <h2>👼 ANGELS 👼</h2>
-                <table id="angels-table">
-                    <thead>
-                        <tr>
-                            <th>Action Item</th>
-                            <th>Count</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+            <table id="angels-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th colspan="20">Occurrences</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
 
-            <div class="demons-section">
-                <h2>😈 DEMONS 😈</h2>
-                <table id="demons-table">
-                    <thead>
-                        <tr>
-                            <th>Action Item</th>
-                            <th>Count</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+            <table id="demons-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th colspan="20">Occurrences</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
 
         <div class="log-section">
@@ -209,8 +210,10 @@
         </div>
     </div>
 
-    <div class="config-screen">
-        <button class="screen-toggle">Main Screen</button>
+    <div class="config-screen screen">
+        <div class="button-container">
+            <button class="main-toggle">Main Screen</button>
+        </div>
         
         <h2>Configuration</h2>
         
@@ -246,322 +249,512 @@
             <button id="add-demon" class="action-btn">Add Demon</button>
         </div>
     </div>
+
+    <div class="howto-screen screen">
+        <div class="button-container">
+            <button class="main-toggle">Main Screen</button>
+        </div>
+        <h2>How to Use TradersAnD</h2>
+        <div class="howto-content">
+            <p>TradersAnD (Traders Angels and Demons) helps you track your trading behavior patterns. Click on actions to log them during your trading session. Angels represent good habits, while Demons represent behaviors to avoid. The score helps you gauge your performance, and the stats page provides insights into your trading patterns over time.</p>
+        </div>
+    </div>
+
+    <div class="stats-screen screen">
+        <div class="button-container">
+            <button class="main-toggle">Main Screen</button>
+        </div>
+        <h2>Statistics</h2>
+        
+        <h3>All Time</h3>
+        <div id="all-time-ac"></div>
+        
+        <h3>This Week</h3>
+        <div id="this-week-ac"></div>
+        
+        <h3>Today</h3>
+        <div id="today-ac"></div>
+
+        <button id="export-csv" class="export-btn">Export to CSV</button>
+        
+        <h3>History</h3>
+        <div id="history-logs"></div>
+    </div>
 </body>
 
 
+    
  <script>
     // Constants
-    const STORAGE_KEYS = {
-        ANGELS: 'tradersand_angels',
-        DEMONS: 'tradersand_demons',
-        LOGS: 'tradersand_logs'
+const STORAGE_KEYS = {
+    ANGELS: 'tradersand_angels',
+    DEMONS: 'tradersand_demons',
+    LOGS: 'tradersand_logs'
+};
+
+const TIME_MESSAGES = {
+    ETH: { start: '00:00', end: '09:30', message: 'ETH' },
+    AM: { start: '09:30', end: '12:00', message: 'AM Session' },
+    PM: { start: '12:00', end: '16:00', message: 'PM Session' }
+};
+
+const SCORE_MESSAGES = [
+    { threshold: -24, message: 'Stop trading, you are damaging your account', class: 'severe-warning' },
+    { threshold: -12, message: 'Consider taking a break', class: 'warning' },
+    { threshold: 0, message: 'Focus', class: 'neutral' },
+    { threshold: 12, message: 'Good job', class: 'good' },
+    { threshold: 24, message: 'Keep up the good work', class: 'excellent' },
+    { threshold: Infinity, message: 'The sky is the limit!', class: 'outstanding' }
+];
+
+// Default configurations
+const DEFAULT_ANGELS = [
+    { action: "A+ Entry", multiplier: 3, maxOccurrence: 3 },
+    { action: "Good Entry", multiplier: 2, maxOccurrence: 6 },
+    { action: "Sit on Hands", multiplier: 1, maxOccurrence: 6 }
+];
+
+const DEFAULT_DEMONS = [
+    { action: "FOMO/Chase entry", multiplier: 1, maxOccurrence: 6 },
+    { action: "Hesitated/Missed Entry", multiplier: 1, maxOccurrence: 6 },
+    { action: "DCA to Death", multiplier: 3, maxOccurrence: 2 }
+];
+
+// State Management
+let angels = JSON.parse(localStorage.getItem(STORAGE_KEYS.ANGELS)) || DEFAULT_ANGELS;
+let demons = JSON.parse(localStorage.getItem(STORAGE_KEYS.DEMONS)) || DEFAULT_DEMONS;
+let logs = JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGS)) || [];
+    
+     
+     
+// Helper Functions
+function saveState() {
+    localStorage.setItem(STORAGE_KEYS.ANGELS, JSON.stringify(angels));
+    localStorage.setItem(STORAGE_KEYS.DEMONS, JSON.stringify(demons));
+    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
+}
+
+function getNYTime() {
+    return new Date().toLocaleString('en-US', {
+        timeZone: 'America/New_York',
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function getNYDateTime() {
+    return new Date().toLocaleString('en-US', {
+        timeZone: 'America/New_York'
+    });
+}
+
+function getSessionMessage() {
+    const nyTime = getNYTime();
+    for (const [key, period] of Object.entries(TIME_MESSAGES)) {
+        if (nyTime >= period.start && nyTime < period.end) {
+            return period.message;
+        }
+    }
+    return 'Market Closed';
+}
+
+function getScoreMessage(score) {
+    for (const { threshold, message } of SCORE_MESSAGES) {
+        if (score < threshold) {
+            return message;
+        }
+    }
+    return SCORE_MESSAGES[SCORE_MESSAGES.length - 1].message;
+}
+
+function calculateProfitLoss(logs, startDate = null, endDate = null) {
+    let filteredLogs = logs;
+    if (startDate && endDate) {
+        filteredLogs = logs.filter(log => {
+            const logDate = new Date(log.datetime);
+            return logDate >= startDate && logDate <= endDate;
+        });
+    }
+
+    return {
+        angelProfit: filteredLogs.filter(log => angels.find(a => a.action === log.action) && log.lucky).length,
+        angelLoss: filteredLogs.filter(log => angels.find(a => a.action === log.action) && !log.lucky).length,
+        demonProfit: filteredLogs.filter(log => demons.find(d => d.action === log.action) && log.lucky).length,
+        demonLoss: filteredLogs.filter(log => demons.find(d => d.action === log.action) && !log.lucky).length
     };
+}
 
-    const TIME_MESSAGES = {
-        ETH: { start: '00:00', end: '09:30', message: 'ETH' },
-        AM: { start: '09:30', end: '12:00', message: 'AM Session' },
-        PM: { start: '12:00', end: '16:00', message: 'PM Session' }
-    };
+function calculateScore() {
+    const angelScore = logs
+        .filter(log => angels.find(a => a.action === log.action))
+        .reduce((sum, log) => {
+            const angel = angels.find(a => a.action === log.action);
+            return sum + (log.lucky ? -angel.multiplier : angel.multiplier);
+        }, 0);
 
-    // Default configurations
-    const DEFAULT_ANGELS = [
-        { action: "A+ Entry", multiplier: 3, maxOccurrence: 3 },
-        { action: "Good Entry", multiplier: 2, maxOccurrence: 6 },
-        { action: "Sit on Hands", multiplier: 1, maxOccurrence: 6 }
-    ];
+    const demonScore = logs
+        .filter(log => demons.find(d => d.action === log.action))
+        .reduce((sum, log) => {
+            const demon = demons.find(d => d.action === log.action);
+            return sum + (log.lucky ? demon.multiplier : -demon.multiplier);
+        }, 0);
 
-    const DEFAULT_DEMONS = [
-        { action: "FOMO/Chase entry", multiplier: 1, maxOccurrence: 6 },
-        { action: "Hesitated/Missed Entry", multiplier: 1, maxOccurrence: 6 },
-        { action: "DCA to Death", multiplier: 3, maxOccurrence: 2 }
-    ];
+    return angelScore + demonScore;
+}
 
-    // State Management
-    let angels = JSON.parse(localStorage.getItem(STORAGE_KEYS.ANGELS)) || DEFAULT_ANGELS;
-    let demons = JSON.parse(localStorage.getItem(STORAGE_KEYS.DEMONS)) || DEFAULT_DEMONS;
-    let logs = JSON.parse(localStorage.getItem(STORAGE_KEYS.LOGS)) || [];
+function createACTable(stats) {
+    return `
+        <table>
+            <tr>
+                <th></th>
+                <th>🍀</th>
+                <th>😞</th>
+            </tr>
+            <tr>
+                <td>💪</td>
+                <td>${stats.angelProfit}</td>
+                <td>${stats.angelLoss}</td>
+            </tr>
+            <tr>
+                <td>👎</td>
+                <td>${stats.demonProfit}</td>
+                <td>${stats.demonLoss}</td>
+            </tr>
+        </table>
+    `;
+}
 
-    // Helper Functions
-    function saveState() {
-        localStorage.setItem(STORAGE_KEYS.ANGELS, JSON.stringify(angels));
-        localStorage.setItem(STORAGE_KEYS.DEMONS, JSON.stringify(demons));
-        localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
-    }
+function exportToCSV() {
+    const headers = ['Date/Time', 'Action', 'Note', 'Outcome'];
+    const csvContent = logs.map(log => {
+        const outcome = log.lucky ? 'Lucky' : 'Unlucky';
+        return `${log.datetime},"${log.action}","${log.note}",${outcome}`;
+    });
+    
+    const csvData = [headers.join(','), ...csvContent].join('\n');
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'trading_log.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
 
-    function getNYTime() {
-        return new Date().toLocaleString('en-US', {
-            timeZone: 'America/New_York',
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
 
-    function getSessionMessage() {
-        const nyTime = getNYTime();
-        for (const [key, period] of Object.entries(TIME_MESSAGES)) {
-            if (nyTime >= period.start && nyTime < period.end) {
-                return period.message;
-            }
-        }
-        return 'Market Closed';
-    }
 
-    function calculateScore() {
-        const angelScore = logs
-            .filter(log => angels.find(a => a.action === log.action))
-            .reduce((sum, log) => {
-                const angel = angels.find(a => a.action === log.action);
-                return sum + angel.multiplier;
-            }, 0);
+     // UI Rendering Functions
+function renderActionTables() {
+    const angelsTable = document.getElementById('angels-table').getElementsByTagName('tbody')[0];
+    const demonsTable = document.getElementById('demons-table').getElementsByTagName('tbody')[0];
 
-        const demonScore = logs
-            .filter(log => demons.find(d => d.action === log.action))
-            .reduce((sum, log) => {
-                const demon = demons.find(d => d.action === log.action);
-                return sum + demon.multiplier;
-            }, 0);
+    angelsTable.innerHTML = '';
+    demonsTable.innerHTML = '';
 
-        return angelScore - demonScore;
-    }
+    function createActionRow(action, isAngel) {
+        const row = document.createElement('tr');
+        const actionCell = document.createElement('td');
+        actionCell.className = 'action-cell';
+        actionCell.textContent = action.action;
+        row.appendChild(actionCell);
 
-    function updateACTable() {
-        const counts = {
-            luckyAngels: 0,
-            unluckyAngels: 0,
-            luckyDemons: 0,
-            unluckyDemons: 0
-        };
+        const actionLogs = logs.filter(log => log.action === action.action);
+        const count = actionLogs.length;
 
-        logs.forEach(log => {
-            if (angels.find(a => a.action === log.action)) {
-                log.lucky ? counts.luckyAngels++ : counts.unluckyAngels++;
-            } else {
-                log.lucky ? counts.luckyDemons++ : counts.unluckyDemons++;
-            }
-        });
-
-        document.getElementById('lucky-angels').textContent = counts.luckyAngels;
-        document.getElementById('unlucky-angels').textContent = counts.unluckyAngels;
-        document.getElementById('lucky-demons').textContent = counts.luckyDemons;
-        document.getElementById('unlucky-demons').textContent = counts.unluckyDemons;
-    }
-
-    function updateScore() {
-        const score = calculateScore();
-        const scoreElement = document.getElementById('total-score');
-        scoreElement.textContent = `Points: ${score}`;
-        scoreElement.className = `score ${score >= 0 ? 'positive' : 'negative'}`;
-    }
-
-    function renderActionTables() {
-        const angelsTable = document.getElementById('angels-table').getElementsByTagName('tbody')[0];
-        const demonsTable = document.getElementById('demons-table').getElementsByTagName('tbody')[0];
-
-        angelsTable.innerHTML = '';
-        demonsTable.innerHTML = '';
-
-        angels.forEach(angel => {
-            const count = logs.filter(log => log.action === angel.action).length;
-            const row = angelsTable.insertRow();
-            row.innerHTML = `
-                <td>${angel.action}</td>
-                <td>${count}/${angel.maxOccurrence}</td>
-            `;
-            row.addEventListener('click', () => addLogEntry(angel.action, true));
-        });
-
-        demons.forEach(demon => {
-            const count = logs.filter(log => log.action === demon.action).length;
-            const row = demonsTable.insertRow();
-            row.innerHTML = `
-                <td>${demon.action}</td>
-                <td>${count}/${demon.maxOccurrence}</td>
-            `;
-            row.addEventListener('click', () => addLogEntry(demon.action, false));
-        });
-    }
-
-    function addLogEntry(action, isAngel) {
-        const count = logs.filter(log => log.action === action).length;
-        const actionConfig = isAngel ? 
-            angels.find(a => a.action === action) : 
-            demons.find(d => d.action === action);
-
-        if (count >= actionConfig.maxOccurrence) {
-            alert(`Warning: Maximum occurrence (${actionConfig.maxOccurrence}) reached for "${action}"`);
-        }
-
-        const log = {
-            time: getNYTime(),
-            action,
-            note: '',
-            lucky: false
-        };
-
-        logs.unshift(log);
-        saveState();
-        renderLogs();
-        updateACTable();
-        updateScore();
-    }
-
-    function renderLogs() {
-        const logContainer = document.getElementById('log-entries');
-        logContainer.innerHTML = '';
-
-        logs.forEach((log, index) => {
-            const isAngel = angels.find(a => a.action === log.action);
-            const logEntry = document.createElement('div');
-            logEntry.className = 'log-entry';
-            logEntry.innerHTML = `
-                <input type="text" value="${log.time}" style="width: 60px">
-                <span>${log.action}</span>
-                <input type="text" value="${log.note}" placeholder="Add note...">
-                <label>
-                    <input type="checkbox" ${log.lucky ? 'checked' : ''}>
-                    ${isAngel ? 'Unlucky' : 'Lucky'}
-                </label>
-                <button class="action-btn">Delete</button>
-            `;
-
-            const timeInput = logEntry.querySelector('input[type="text"]');
-            const noteInput = logEntry.querySelectorAll('input[type="text"]')[1];
-            const luckyCheckbox = logEntry.querySelector('input[type="checkbox"]');
-            const deleteButton = logEntry.querySelector('button');
-
-            timeInput.addEventListener('change', (e) => {
-                log.time = e.target.value;
-                saveState();
-            });
-
-            noteInput.addEventListener('change', (e) => {
-                log.note = e.target.value;
-                saveState();
-            });
-
-            luckyCheckbox.addEventListener('change', (e) => {
-                log.lucky = e.target.checked;
-                saveState();
-                updateACTable();
-            });
-
-            deleteButton.addEventListener('click', () => {
-                logs.splice(index, 1);
-                saveState();
-                renderLogs();
-                updateACTable();
-                updateScore();
-            });
-
-            logContainer.appendChild(logEntry);
-        });
-    }
-
-    function renderConfigTables() {
-        const angelsConfig = document.getElementById('angels-config').getElementsByTagName('tbody')[0];
-        const demonsConfig = document.getElementById('demons-config').getElementsByTagName('tbody')[0];
-
-        angelsConfig.innerHTML = '';
-        demonsConfig.innerHTML = '';
-
-        function createConfigRow(item, isAngel) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><input type="text" value="${item.action}"></td>
-                <td><input type="number" value="${item.multiplier}" min="1" max="5"></td>
-                <td><input type="number" value="${item.maxOccurrence}" min="2" max="20"></td>
-                <td><button class="action-btn">Delete</button></td>
-            `;
-
-            const inputs = row.getElementsByTagName('input');
-            const deleteButton = row.getElementsByTagName('button')[0];
-
-            Array.from(inputs).forEach(input => {
-                input.addEventListener('change', () => {
-                    item.action = inputs[0].value;
-                    item.multiplier = parseInt(inputs[1].value);
-                    item.maxOccurrence = parseInt(inputs[2].value);
-                    saveState();
-                    renderActionTables();
-                });
-            });
-
-            deleteButton.addEventListener('click', () => {
-                const array = isAngel ? angels : demons;
-                const index = array.indexOf(item);
-                array.splice(index, 1);
-                saveState();
-                renderConfigTables();
-                renderActionTables();
-            });
-
-            return row;
-        }
-
-        angels.forEach(angel => {
-            angelsConfig.appendChild(createConfigRow(angel, true));
-        });
-
-        demons.forEach(demon => {
-            demonsConfig.appendChild(createConfigRow(demon, false));
-        });
-    }
-
-    // Event Listeners
-    document.querySelectorAll('.screen-toggle').forEach(button => {
-        button.addEventListener('click', () => {
-            const mainScreen = document.querySelector('.main-screen');
-            const configScreen = document.querySelector('.config-screen');
+        for (let i = 0; i < 20; i++) {
+            const cell = document.createElement('td');
+            cell.className = i < action.maxOccurrence ? 'check-cell' : 'disabled-cell';
             
-            if (mainScreen.style.display === 'none') {
-                mainScreen.style.display = 'block';
-                configScreen.style.display = 'none';
-            } else {
-                mainScreen.style.display = 'none';
-                configScreen.style.display = 'block';
+            if (i < count) {
+                if (i >= action.maxOccurrence - 1) {
+                    cell.textContent = isAngel ? '💵' : '💀';
+                } else {
+                    cell.textContent = '✓';
+                }
             }
-            
-            renderConfigTables(); // Refresh config tables when switching screens
+            row.appendChild(cell);
+        }
+
+        row.addEventListener('click', () => addLogEntry(action.action, isAngel));
+        return row;
+    }
+
+    angels.forEach(angel => {
+        angelsTable.appendChild(createActionRow(angel, true));
+    });
+
+    demons.forEach(demon => {
+        demonsTable.appendChild(createActionRow(demon, false));
+    });
+}
+
+function updateScore() {
+    const score = calculateScore();
+    const scoreElement = document.getElementById('total-score');
+    const messageElement = document.getElementById('score-message');
+    
+    scoreElement.textContent = `Score: ${score}`;
+    scoreElement.className = `score ${score >= 0 ? 'positive' : 'negative'}`;
+    messageElement.textContent = getScoreMessage(score);
+}
+
+function renderLogs() {
+    const logContainer = document.getElementById('log-entries');
+    logContainer.innerHTML = '';
+
+    logs.forEach((log, index) => {
+        const isAngel = angels.find(a => a.action === log.action);
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.innerHTML = `
+            <input type="text" value="${new Date(log.datetime).toLocaleTimeString('en-US', { hour12: false })}" style="width: 60px">
+            <span>${log.action}</span>
+            <input type="text" value="${log.note}" placeholder="Add note...">
+            <label>
+                <input type="checkbox" ${log.lucky ? 'checked' : ''}>
+                ${isAngel ? 'Unlucky' : 'Lucky'}
+            </label>
+            <button class="action-btn">Delete</button>
+        `;
+
+        const timeInput = logEntry.querySelector('input[type="text"]');
+        const noteInput = logEntry.querySelectorAll('input[type="text"]')[1];
+        const luckyCheckbox = logEntry.querySelector('input[type="checkbox"]');
+        const deleteButton = logEntry.querySelector('button');
+
+        timeInput.addEventListener('change', (e) => {
+            const [hours, minutes] = e.target.value.split(':');
+            const datetime = new Date(log.datetime);
+            datetime.setHours(hours);
+            datetime.setMinutes(minutes);
+            log.datetime = datetime.toISOString();
+            saveState();
         });
-    });
 
-    document.getElementById('add-angel').addEventListener('click', () => {
-        angels.push({ action: 'New Angel', multiplier: 1, maxOccurrence: 2 });
-        saveState();
-        renderConfigTables();
-        renderActionTables();
-    });
+        noteInput.addEventListener('change', (e) => {
+            log.note = e.target.value;
+            saveState();
+        });
 
-    document.getElementById('add-demon').addEventListener('click', () => {
-        demons.push({ action: 'New Demon', multiplier: 1, maxOccurrence: 2 });
-        saveState();
-        renderConfigTables();
-        renderActionTables();
-    });
+        luckyCheckbox.addEventListener('change', (e) => {
+            log.lucky = e.target.checked;
+            saveState();
+            renderActionTables();
+            updateScore();
+            updateStats();
+        });
 
-    document.getElementById('clear-logs').addEventListener('click', () => {
-        if (confirm('Are you sure you want to clear all logs?')) {
-            logs = [];
+        deleteButton.addEventListener('click', () => {
+            logs.splice(index, 1);
             saveState();
             renderLogs();
-            updateACTable();
+            renderActionTables();
             updateScore();
-        }
-    });
+            updateStats();
+        });
 
-    // Initialize
-    function updateClock() {
-        document.getElementById('ny-time').textContent = getNYTime();
-        document.getElementById('session-message').textContent = getSessionMessage();
+        logContainer.appendChild(logEntry);
+    });
+}
+
+
+
+
+
+
+     function renderConfigTables() {
+    const angelsConfig = document.getElementById('angels-config').getElementsByTagName('tbody')[0];
+    const demonsConfig = document.getElementById('demons-config').getElementsByTagName('tbody')[0];
+
+    angelsConfig.innerHTML = '';
+    demonsConfig.innerHTML = '';
+
+    function createConfigRow(item, isAngel) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="text" value="${item.action}" required></td>
+            <td><input type="number" value="${item.multiplier}" min="1" max="5" required></td>
+            <td><input type="number" value="${item.maxOccurrence}" min="2" max="20" required></td>
+            <td><button class="action-btn">Delete</button></td>
+        `;
+
+        const inputs = row.getElementsByTagName('input');
+        const deleteButton = row.getElementsByTagName('button')[0];
+
+        Array.from(inputs).forEach(input => {
+            input.addEventListener('change', () => {
+                item.action = inputs[0].value;
+                item.multiplier = parseInt(inputs[1].value) || 1;
+                item.maxOccurrence = parseInt(inputs[2].value) || 2;
+                
+                item.multiplier = Math.min(Math.max(item.multiplier, 1), 5);
+                item.maxOccurrence = Math.min(Math.max(item.maxOccurrence, 2), 20);
+                
+                saveState();
+                renderActionTables();
+            });
+        });
+
+        deleteButton.addEventListener('click', () => {
+            const array = isAngel ? angels : demons;
+            const index = array.indexOf(item);
+            array.splice(index, 1);
+            saveState();
+            renderConfigTables();
+            renderActionTables();
+        });
+
+        return row;
     }
 
-    // Start the app
-    renderActionTables();
-    renderConfigTables();
+    angels.forEach(angel => {
+        angelsConfig.appendChild(createConfigRow(angel, true));
+    });
+
+    demons.forEach(demon => {
+        demonsConfig.appendChild(createConfigRow(demon, false));
+    });
+}
+
+function updateStats() {
+    // All time stats
+    const allTimeStats = calculateProfitLoss(logs);
+    document.getElementById('all-time-ac').innerHTML = createACTable(allTimeStats);
+
+    // This week stats
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    const weekStats = calculateProfitLoss(logs, weekStart, new Date());
+    document.getElementById('this-week-ac').innerHTML = createACTable(weekStats);
+
+    // Today stats
+    const dayStart = new Date();
+    dayStart.setHours(0, 0, 0, 0);
+    const dayStats = calculateProfitLoss(logs, dayStart, new Date());
+    document.getElementById('today-ac').innerHTML = createACTable(dayStats);
+
+    // History logs
+    const historyContainer = document.getElementById('history-logs');
+    historyContainer.innerHTML = '';
+
+    const groupedLogs = logs.reduce((groups, log) => {
+        const date = new Date(log.datetime).toLocaleDateString();
+        if (!groups[date]) groups[date] = [];
+        groups[date].push(log);
+        return groups;
+    }, {});
+
+    Object.entries(groupedLogs)
+        .sort((a, b) => new Date(b[0]) - new Date(a[0]))
+        .forEach(([date, dayLogs]) => {
+            const dayStats = calculateProfitLoss(dayLogs);
+            const section = document.createElement('div');
+            section.innerHTML = `
+                <h4>${date}</h4>
+                ${createACTable(dayStats)}
+            `;
+            historyContainer.appendChild(section);
+        });
+}
+
+
+
+     // Event Handlers
+function addLogEntry(action, isAngel) {
+    const count = logs.filter(log => log.action === action).length;
+    const actionConfig = isAngel ? 
+        angels.find(a => a.action === action) : 
+        demons.find(d => d.action === action);
+
+    if (count >= actionConfig.maxOccurrence) {
+        alert(`Warning: Maximum occurrence (${actionConfig.maxOccurrence}) reached for "${action}"`);
+    }
+
+    const log = {
+        datetime: getNYDateTime(),
+        action,
+        note: '',
+        lucky: false
+    };
+
+    logs.unshift(log);
+    saveState();
     renderLogs();
-    updateACTable();
+    renderActionTables();
     updateScore();
-    updateClock();
-    setInterval(updateClock, 60000);
-</script>
+    updateStats();
+}
+
+function showScreen(screenName) {
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    document.querySelector(`.${screenName}-screen`).classList.add('active');
+}
+
+// Event Listeners
+document.querySelectorAll('.main-toggle').forEach(button => {
+    button.addEventListener('click', () => showScreen('main'));
+});
+
+document.querySelector('.config-toggle').addEventListener('click', () => {
+    showScreen('config');
+    renderConfigTables();
+});
+
+document.querySelector('.howto-toggle').addEventListener('click', () => {
+    showScreen('howto');
+});
+
+document.querySelector('.stats-toggle').addEventListener('click', () => {
+    showScreen('stats');
+    updateStats();
+});
+
+document.getElementById('add-angel').addEventListener('click', () => {
+    angels.push({ action: 'New Angel', multiplier: 1, maxOccurrence: 2 });
+    saveState();
+    renderConfigTables();
+    renderActionTables();
+});
+
+document.getElementById('add-demon').addEventListener('click', () => {
+    demons.push({ action: 'New Demon', multiplier: 1, maxOccurrence: 2 });
+    saveState();
+    renderConfigTables();
+    renderActionTables();
+});
+
+document.getElementById('clear-logs').addEventListener('click', () => {
+    if (confirm('Are you sure you want to clear all logs?')) {
+        logs = [];
+        saveState();
+        renderLogs();
+        renderActionTables();
+        updateScore();
+        updateStats();
+    }
+});
+
+document.getElementById('export-csv').addEventListener('click', exportToCSV);
+
+// Initialize
+function updateClock() {
+    document.getElementById('ny-time').textContent = getNYTime();
+    document.getElementById('session-message').textContent = getSessionMessage();
+}
+
+// Start the app
+renderActionTables();
+renderConfigTables();
+renderLogs();
+updateScore();
+updateStats();
+updateClock();
+setInterval(updateClock, 60000);
+
+ </script>

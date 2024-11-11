@@ -33,9 +33,9 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 20px;
+            margin: 40px 0 20px 0;
             background-color: var(--light-brown);
-            padding: 15px;
+            padding: 10px;
             border-radius: 5px;
         }
 
@@ -64,6 +64,7 @@
             background-color: var(--sage);
             padding: 10px;
             border-radius: 5px;
+            text-align: center;
         }
 
         table {
@@ -71,8 +72,6 @@
             border-collapse: collapse;
             margin-bottom: 20px;
             background-color: white;
-            overflow-x: auto;
-            display: block;
         }
 
         th, td {
@@ -137,326 +136,34 @@
             align-items: center;
         }
 
+        .log-entry .delete-btn {
+            cursor: pointer;
+        }
+
         .config-screen, .howto-screen, .stats-screen {
             display: none;
             padding: 20px;
         }
 
-        .screen {
-            display: none;
+        .config-section {
+            margin-bottom: 30px;
         }
-
-        .screen.active {
-            display: block;
-        }
-
-        .export-btn {
-            margin: 10px 0;
-            padding: 10px;
-            background-color: var(--sage);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .button-container {
-                position: static;
-                margin-bottom: 20px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="main-screen screen active">
-        <div class="button-container">
-            <button class="howto-toggle">How To</button>
-            <button class="stats-toggle">Stats</button>
-            <button class="config-toggle">Configuration</button>
-        </div>
         
-        <div class="header">
-            <div class="ac-table">
-                <table>
-                    <tr>
-                        <th></th>
-                        <th>🍀</th>
-                        <th>😞</th>
-                    </tr>
-                    <tr>
-                        <td>💪</td>
-                        <td id="lucky-angels">0</td>
-                        <td id="unlucky-angels">0</td>
-                    </tr>
-                    <tr>
-                        <td>👎</td>
-                        <td id="lucky-demons">0</td>
-                        <td id="unlucky-demons">0</td>
-                    </tr>
-                </table>
-            </div>
-            <div class="score-container">
-                <div class="score" id="total-score">Score: 0</div>
-                <div class="score-message" id="score-message"></div>
-            </div>
-            <div class="window">
-                <div id="ny-time"></div>
-                <div id="session-message"></div>
-            </div>
-        </div>
-
-        <div class="actions-section">
-            <table id="angels-table">
-                <thead>
-                    <tr>
-                        <th>Action</th>
-                        <th colspan="20">Occurrences</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-
-            <table id="demons-table">
-                <thead>
-                    <tr>
-                        <th>Action</th>
-                        <th colspan="20">Occurrences</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div class="log-section">
-            <h2>Actions Log</h2>
-            <button id="clear-logs" class="action-btn">Clear All Logs</button>
-            <div id="log-entries"></div>
-        </div>
-    </div>
-
-    <div class="config-screen screen">
-        <div class="button-container">
-            <button class="main-toggle">Main Screen</button>
-        </div>
-        
-        <h2>Configuration</h2>
-        
-        <div class="config-section">
-            <h3>Angels Configuration</h3>
-            <table id="angels-config">
-                <thead>
-                    <tr>
-                        <th>Action Item</th>
-                        <th>Multiplier (1-5)</th>
-                        <th>Max Occurrence (2-20)</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <button id="add-angel" class="action-btn">Add Angel</button>
-        </div>
-
-        <div class="config-section">
-            <h3>Demons Configuration</h3>
-            <table id="demons-config">
-                <thead>
-                    <tr>
-                        <th>Action Item</th>
-                        <th>Multiplier (1-5)</th>
-                        <th>Max Occurrence (2-20)</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <button id="add-demon" class="action-btn">Add Demon</button>
-        </div>
-    </div>
-
-    <div class="howto-screen screen">
-        <div class="button-container">
-            <button class="main-toggle">Main Screen</button>
-        </div>
-        <h2>How to Use TradersAnD</h2>
-        <div class="howto-content">
-            <p>TradersAnD (Traders Angels and Demons) helps you track your trading behavior patterns. Click on actions to log them during your trading session. Angels represent good habits, while Demons represent behaviors to avoid. The score helps you gauge your performance, and the stats page provides insights into your trading patterns over time.</p>
-        </div>
-    </div>
-
-    <div class="stats-screen screen">
-        <div class="button-container">
-            <button class="main-toggle">Main Screen</button>
-        </div>
-        <h2>Statistics</h2>
-        
-        <h3>All Time</h3>
-        <div id="all-time-ac"></div>
-        
-        <h3>This Week</h3>
-        <div id="this-week-ac"></div>
-        
-        <h3>Today</h3>
-        <div id="today-ac"></div>
-
-        <button id="export-csv" class="export-btn">Export to CSV</button>
-        
-        <h3>History</h3>
-        <div id="history-logs"></div>
-    </div>
-</body>
-
-<script>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TradersAnD - Traders Angels and Demons</title>
-    <style>
-        :root {
-            --primary-brown: #8B4513;
-            --light-brown: #DEB887;
-            --dark-brown: #654321;
-            --beige: #F5F5DC;
-            --sage: #9CAF88;
-            --success: #4F7942;
-            --error: #8B0000;
-            --light-gray: #E0E0E0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--beige);
-            color: var(--dark-brown);
-            padding: 20px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            background-color: var(--light-brown);
-            padding: 15px;
-            border-radius: 5px;
-        }
-
-        .score-container {
-            text-align: center;
-        }
-
-        .score {
-            font-size: 24px;
-            font-weight: bold;
+        .config-section h3 {
             margin-bottom: 10px;
         }
-
-        .score-message {
-            font-size: 14px;
-            padding: 5px;
-            border-radius: 3px;
-            background-color: var(--sage);
-            color: white;
+        
+        #angels-config, #demons-config {
+            margin-bottom: 10px;
         }
-
-        .score.positive { color: var(--success); }
-        .score.negative { color: var(--error); }
-
-        .window {
-            background-color: var(--sage);
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        table {
+        
+        .config-screen input {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            background-color: white;
-            overflow-x: auto;
-            display: block;
+            padding: 5px;
         }
-
-        th, td {
-            border: 1px solid var(--light-brown);
-            padding: 8px;
-            text-align: center;
-            min-width: 30px;
-        }
-
-        th {
-            background-color: var(--light-brown);
-            color: var(--dark-brown);
-        }
-
-        .action-cell {
-            text-align: left;
-            cursor: pointer;
-            min-width: 150px;
-        }
-
-        .check-cell {
-            background-color: white;
-        }
-
-        .disabled-cell {
-            background-color: var(--light-gray);
-        }
-
-        .button-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .screen-toggle, .howto-toggle, .stats-toggle {
-            padding: 10px;
-            background-color: var(--primary-brown);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .log-section {
-            margin-top: 20px;
-        }
-
-        .log-entry {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 5px;
-            align-items: center;
-        }
-
-        .config-screen, .howto-screen, .stats-screen {
-            display: none;
-            padding: 20px;
-        }
-
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
+        
+        .config-screen input[type="number"] {
+            width: 80px;
         }
 
         .export-btn {
@@ -469,6 +176,35 @@
             cursor: pointer;
         }
 
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .costly-mistakes {
+            margin: 20px 0;
+        }
+
+        .mistakes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .date-picker {
+            margin: 20px 0;
+        }
+
+        .howto-content {
+            line-height: 1.6;
+        }
+
+        .howto-content section {
+            margin-bottom: 20px;
+        }
+
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -479,13 +215,18 @@
                 position: static;
                 margin-bottom: 20px;
             }
+
+            .stats-grid, .mistakes-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
 
+
 <body>
-    <div class="main-screen screen active">
+    <div class="main-screen">
         <div class="button-container">
             <button class="howto-toggle">How To</button>
             <button class="stats-toggle">Stats</button>
@@ -527,7 +268,7 @@
                 <thead>
                     <tr>
                         <th>Action</th>
-                        <th colspan="20">Occurrences</th>
+                        <th colspan="20">Angels</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -537,7 +278,7 @@
                 <thead>
                     <tr>
                         <th>Action</th>
-                        <th colspan="20">Occurrences</th>
+                        <th colspan="20">Demons</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -551,7 +292,7 @@
         </div>
     </div>
 
-    <div class="config-screen screen">
+    <div class="config-screen">
         <div class="button-container">
             <button class="main-toggle">Main Screen</button>
         </div>
@@ -591,42 +332,104 @@
         </div>
     </div>
 
-    <div class="howto-screen screen">
+    <div class="howto-screen">
         <div class="button-container">
             <button class="main-toggle">Main Screen</button>
         </div>
         <h2>How to Use TradersAnD</h2>
         <div class="howto-content">
-            <p>TradersAnD (Traders Angels and Demons) helps you track your trading behavior patterns. Click on actions to log them during your trading session. Angels represent good habits, while Demons represent behaviors to avoid. The score helps you gauge your performance, and the stats page provides insights into your trading patterns over time.</p>
+            <section>
+                <h3>Main Screen</h3>
+                <p>The main screen is your daily trading companion:</p>
+                <ul>
+                    <li>The top section shows your current performance metrics and New York time</li>
+                    <li>Angels list shows positive trading behaviors - click to log them</li>
+                    <li>Demons list shows behaviors to avoid - click to acknowledge them</li>
+                    <li>Check marks track occurrences, with special indicators (💵 for Angels, 💀 for Demons) after reaching max occurrences</li>
+                    <li>Daily action log at the bottom shows your activity, allowing you to add notes and mark actions as lucky/unlucky</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h3>Configuration</h3>
+                <p>Customize your tracking by:</p>
+                <ul>
+                    <li>Adding new Angels or Demons</li>
+                    <li>Setting multipliers (1-5) to weigh the importance of actions</li>
+                    <li>Defining max occurrences (2-20) for each action</li>
+                    <li>Modifying or deleting existing actions</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h3>Statistics</h3>
+                <p>Analyze your trading patterns:</p>
+                <ul>
+                    <li>View performance metrics for different time periods</li>
+                    <li>Identify your most costly mistakes</li>
+                    <li>Review historical data by date</li>
+                    <li>Export your trading log as a CSV file for further analysis</li>
+                </ul>
+            </section>
         </div>
     </div>
 
-    <div class="stats-screen screen">
+    <div class="stats-screen">
         <div class="button-container">
             <button class="main-toggle">Main Screen</button>
         </div>
         <h2>Statistics</h2>
         
-        <h3>All Time</h3>
-        <div id="all-time-ac"></div>
-        
-        <h3>This Week</h3>
-        <div id="this-week-ac"></div>
-        
-        <h3>Today</h3>
-        <div id="today-ac"></div>
+        <div class="stats-grid">
+            <div>
+                <h3>All Time</h3>
+                <div id="all-time-ac"></div>
+            </div>
+            
+            <div>
+                <h3>This Week</h3>
+                <div id="this-week-ac"></div>
+            </div>
+            
+            <div>
+                <h3>Today</h3>
+                <div id="today-ac"></div>
+            </div>
+        </div>
+
+        <div class="costly-mistakes">
+            <h3>Costly Mistakes</h3>
+            <div class="mistakes-grid">
+                <div>
+                    <h4>All Time Top 3</h4>
+                    <div id="all-time-mistakes"></div>
+                </div>
+                <div>
+                    <h4>This Week Top 3</h4>
+                    <div id="week-mistakes"></div>
+                </div>
+                <div>
+                    <h4>Today Top 3</h4>
+                    <div id="today-mistakes"></div>
+                </div>
+            </div>
+        </div>
 
         <button id="export-csv" class="export-btn">Export to CSV</button>
         
-        <h3>History</h3>
-        <div id="history-logs"></div>
+        <div class="history-section">
+            <h3>History</h3>
+            <input type="date" id="history-date" class="date-picker">
+            <div id="history-logs"></div>
+        </div>
     </div>
 </body>
 
+
+
+
+
 <script>
-
-
-
 // Constants
 const STORAGE_KEYS = {
     ANGELS: 'tradersand_angels',
@@ -649,7 +452,6 @@ const SCORE_MESSAGES = [
     { threshold: Infinity, message: 'The sky is the limit!', class: 'outstanding' }
 ];
 
-// Default configurations
 const DEFAULT_ANGELS = [
     { action: "A+ Entry", multiplier: 3, maxOccurrence: 3 },
     { action: "Good Entry", multiplier: 2, maxOccurrence: 6 },
@@ -677,9 +479,6 @@ if (!demons || demons.length === 0) {
     demons = DEFAULT_DEMONS;
     localStorage.setItem(STORAGE_KEYS.DEMONS, JSON.stringify(demons));
 }
-
-
-
 
 // Helper Functions
 function saveState() {
@@ -732,26 +531,47 @@ function calculateProfitLoss(logs, startDate = null, endDate = null) {
     }
 
     return {
-        angelProfit: filteredLogs.filter(log => angels.find(a => a.action === log.action) && log.lucky).length,
-        angelLoss: filteredLogs.filter(log => angels.find(a => a.action === log.action) && !log.lucky).length,
-        demonProfit: filteredLogs.filter(log => demons.find(d => d.action === log.action) && log.lucky).length,
-        demonLoss: filteredLogs.filter(log => demons.find(d => d.action === log.action) && !log.lucky).length
+        angelProfit: filteredLogs.filter(log => {
+            const isAngel = angels.find(a => a.action === log.action);
+            return isAngel && !log.lucky;  // Angel is profitable when NOT marked as unlucky
+        }).length,
+        angelLoss: filteredLogs.filter(log => {
+            const isAngel = angels.find(a => a.action === log.action);
+            return isAngel && log.lucky;   // Angel is a loss when marked as unlucky
+        }).length,
+        demonProfit: filteredLogs.filter(log => {
+            const isDemon = demons.find(d => d.action === log.action);
+            return isDemon && log.lucky;    // Demon is profitable when marked as lucky
+        }).length,
+        demonLoss: filteredLogs.filter(log => {
+            const isDemon = demons.find(d => d.action === log.action);
+            return isDemon && !log.lucky;   // Demon is a loss when NOT marked as lucky
+        }).length
     };
 }
 
 function calculateScore() {
-    const angelScore = logs
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todayLogs = logs.filter(log => {
+        const logDate = new Date(log.datetime);
+        logDate.setHours(0, 0, 0, 0);
+        return logDate.getTime() === today.getTime();
+    });
+
+    const angelScore = todayLogs
         .filter(log => angels.find(a => a.action === log.action))
         .reduce((sum, log) => {
             const angel = angels.find(a => a.action === log.action);
-            return sum + (log.lucky ? -angel.multiplier : angel.multiplier);
+            return sum + angel.multiplier;
         }, 0);
 
-    const demonScore = logs
+    const demonScore = todayLogs
         .filter(log => demons.find(d => d.action === log.action))
         .reduce((sum, log) => {
             const demon = demons.find(d => d.action === log.action);
-            return sum + (log.lucky ? demon.multiplier : -demon.multiplier);
+            return sum - demon.multiplier;
         }, 0);
 
     return angelScore + demonScore;
@@ -779,6 +599,25 @@ function createACTable(stats) {
     `;
 }
 
+function getMistakes(logs, startDate = null, endDate = null) {
+    let filteredLogs = logs;
+    if (startDate && endDate) {
+        filteredLogs = logs.filter(log => {
+            const logDate = new Date(log.datetime);
+            return logDate >= startDate && logDate <= endDate;
+        });
+    }
+
+    const mistakes = demons.map(demon => {
+        const count = filteredLogs.filter(log => log.action === demon.action).length;
+        return { ...demon, count };
+    });
+
+    return mistakes
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
+}
+
 function exportToCSV() {
     const headers = ['Date/Time', 'Action', 'Note', 'Outcome'];
     const csvContent = logs.map(log => {
@@ -798,16 +637,22 @@ function exportToCSV() {
     document.body.removeChild(a);
 }
 
-
-
+function updateACTables() {
+    const dayStart = new Date();
+    dayStart.setHours(0, 0, 0, 0);
+    const dayStats = calculateProfitLoss(logs, dayStart, new Date());
+    
+    document.getElementById('lucky-angels').textContent = dayStats.angelProfit;
+    document.getElementById('unlucky-angels').textContent = dayStats.angelLoss;
+    document.getElementById('lucky-demons').textContent = dayStats.demonProfit;
+    document.getElementById('unlucky-demons').textContent = dayStats.demonLoss;
+}
 
 
 
 
 // UI Rendering Functions
 function renderActionTables() {
-    console.log('Rendering action tables:', { angels, demons }); // Debug log
-    
     const angelsTable = document.getElementById('angels-table').getElementsByTagName('tbody')[0];
     const demonsTable = document.getElementById('demons-table').getElementsByTagName('tbody')[0];
 
@@ -823,15 +668,20 @@ function renderActionTables() {
         const row = document.createElement('tr');
         const actionCell = document.createElement('td');
         actionCell.className = 'action-cell';
-        actionCell.textContent = action.action;
+        actionCell.textContent = `${action.action} (${action.multiplier})`;
         actionCell.addEventListener('click', (e) => {
             e.stopPropagation();
             addLogEntry(action.action, isAngel);
         });
         row.appendChild(actionCell);
 
-        const actionLogs = logs.filter(log => log.action === action.action);
-        const count = actionLogs.length;
+        const todayLogs = logs.filter(log => {
+            const logDate = new Date(log.datetime);
+            const today = new Date();
+            return logDate.toDateString() === today.toDateString() && 
+                   log.action === action.action;
+        });
+        const count = todayLogs.length;
 
         for (let i = 0; i < 20; i++) {
             const cell = document.createElement('td');
@@ -850,7 +700,6 @@ function renderActionTables() {
         return row;
     }
 
-    // Ensure we have data to render
     if (angels && angels.length > 0) {
         angels.forEach(angel => {
             angelsTable.appendChild(createActionRow(angel, true));
@@ -864,83 +713,6 @@ function renderActionTables() {
     }
 }
 
-function updateScore() {
-    const score = calculateScore();
-    const scoreElement = document.getElementById('total-score');
-    const messageElement = document.getElementById('score-message');
-    
-    scoreElement.textContent = `Score: ${score}`;
-    scoreElement.className = `score ${score >= 0 ? 'positive' : 'negative'}`;
-    messageElement.textContent = getScoreMessage(score);
-}
-
-function renderLogs() {
-    const logContainer = document.getElementById('log-entries');
-    logContainer.innerHTML = '';
-
-    logs.forEach((log, index) => {
-        const isAngel = angels.find(a => a.action === log.action);
-        const logEntry = document.createElement('div');
-        logEntry.className = 'log-entry';
-        logEntry.innerHTML = `
-            <input type="text" value="${new Date(log.datetime).toLocaleTimeString('en-US', { hour12: false })}" style="width: 60px">
-            <span>${log.action}</span>
-            <input type="text" value="${log.note}" placeholder="Add note...">
-            <label>
-                <input type="checkbox" ${log.lucky ? 'checked' : ''}>
-                ${isAngel ? 'Unlucky' : 'Lucky'}
-            </label>
-            <button class="action-btn">Delete</button>
-        `;
-
-        const timeInput = logEntry.querySelector('input[type="text"]');
-        const noteInput = logEntry.querySelectorAll('input[type="text"]')[1];
-        const luckyCheckbox = logEntry.querySelector('input[type="checkbox"]');
-        const deleteButton = logEntry.querySelector('button');
-
-        timeInput.addEventListener('change', (e) => {
-            const [hours, minutes] = e.target.value.split(':');
-            const datetime = new Date(log.datetime);
-            datetime.setHours(hours);
-            datetime.setMinutes(minutes);
-            log.datetime = datetime.toISOString();
-            saveState();
-        });
-
-        noteInput.addEventListener('change', (e) => {
-            log.note = e.target.value;
-            saveState();
-        });
-
-        luckyCheckbox.addEventListener('change', (e) => {
-            log.lucky = e.target.checked;
-            saveState();
-            renderActionTables();
-            updateScore();
-            updateStats();
-        });
-
-        deleteButton.addEventListener('click', () => {
-            logs.splice(index, 1);
-            saveState();
-            renderLogs();
-            renderActionTables();
-            updateScore();
-            updateStats();
-        });
-
-        logContainer.appendChild(logEntry);
-    });
-}
-
-
-
-
-
-
-
-
-
 function renderConfigTables() {
     const angelsConfig = document.getElementById('angels-config').getElementsByTagName('tbody')[0];
     const demonsConfig = document.getElementById('demons-config').getElementsByTagName('tbody')[0];
@@ -951,24 +723,20 @@ function renderConfigTables() {
     function createConfigRow(item, isAngel) {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td><input type="text" value="${item.action}" required></td>
-            <td><input type="number" value="${item.multiplier}" min="1" max="5" required></td>
-            <td><input type="number" value="${item.maxOccurrence}" min="2" max="20" required></td>
+            <td><input type="text" value="${item.action}"></td>
+            <td><input type="number" value="${item.multiplier}" min="1" max="5"></td>
+            <td><input type="number" value="${item.maxOccurrence}" min="2" max="20"></td>
             <td><button class="action-btn">Delete</button></td>
         `;
 
         const inputs = row.getElementsByTagName('input');
-        const deleteButton = row.getElementsByTagName('button')[0];
+        const deleteButton = row.querySelector('.action-btn');
 
         Array.from(inputs).forEach(input => {
             input.addEventListener('change', () => {
                 item.action = inputs[0].value;
-                item.multiplier = parseInt(inputs[1].value) || 1;
-                item.maxOccurrence = parseInt(inputs[2].value) || 2;
-                
-                item.multiplier = Math.min(Math.max(item.multiplier, 1), 5);
-                item.maxOccurrence = Math.min(Math.max(item.maxOccurrence, 2), 20);
-                
+                item.multiplier = Math.min(Math.max(parseInt(inputs[1].value) || 1, 1), 5);
+                item.maxOccurrence = Math.min(Math.max(parseInt(inputs[2].value) || 2, 2), 20);
                 saveState();
                 renderActionTables();
             });
@@ -995,62 +763,149 @@ function renderConfigTables() {
     });
 }
 
+function updateScore() {
+    const score = calculateScore();
+    const scoreElement = document.getElementById('total-score');
+    const messageElement = document.getElementById('score-message');
+    
+    scoreElement.textContent = `Score: ${score}`;
+    scoreElement.className = `score ${score >= 0 ? 'positive' : 'negative'}`;
+    messageElement.textContent = getScoreMessage(score);
+}
+
+function renderLogs() {
+    const logContainer = document.getElementById('log-entries');
+    logContainer.innerHTML = '';
+
+    const today = new Date();
+    const todayLogs = logs.filter(log => {
+        const logDate = new Date(log.datetime);
+        return logDate.toDateString() === today.toDateString();
+    });
+
+    todayLogs.forEach((log) => {
+        const isAngel = angels.find(a => a.action === log.action);
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.innerHTML = `
+            <span class="delete-btn">🗑️</span>
+            <input type="text" value="${new Date(log.datetime).toLocaleTimeString('en-US', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit'
+            })}" style="width: 60px">
+            <input type="text" value="${log.note}" placeholder="Add note..." style="flex-grow: 1">
+            <span>${isAngel ? '💪' : '👎'}</span>
+            <span>${log.action}</span>
+            <label>
+                <input type="checkbox" ${log.lucky ? 'checked' : ''}>
+                ${isAngel ? 'Unlucky' : 'Lucky'}
+            </label>
+        `;
+
+        const deleteBtn = logEntry.querySelector('.delete-btn');
+        const timeInput = logEntry.querySelector('input[type="text"]');
+        const noteInput = logEntry.querySelectorAll('input[type="text"]')[1];
+        const luckyCheckbox = logEntry.querySelector('input[type="checkbox"]');
+
+        deleteBtn.addEventListener('click', () => {
+            logs.splice(logs.indexOf(log), 1);
+            saveState();
+            renderLogs();
+            renderActionTables();
+            updateScore();
+            updateStats();
+            updateACTables();
+        });
+
+        timeInput.addEventListener('change', (e) => {
+            const [hours, minutes] = e.target.value.split(':');
+            const datetime = new Date(log.datetime);
+            datetime.setHours(hours);
+            datetime.setMinutes(minutes);
+            log.datetime = datetime.toISOString();
+            saveState();
+        });
+
+        noteInput.addEventListener('change', (e) => {
+            log.note = e.target.value;
+            saveState();
+        });
+
+        luckyCheckbox.addEventListener('change', (e) => {
+            log.lucky = e.target.checked;
+            saveState();
+            renderActionTables();
+            updateStats();
+            updateACTables();
+        });
+
+        logContainer.appendChild(logEntry);
+    });
+}
+
 function updateStats() {
-    // All time stats
+    // AC Tables
     const allTimeStats = calculateProfitLoss(logs);
     document.getElementById('all-time-ac').innerHTML = createACTable(allTimeStats);
 
-    // This week stats
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
     weekStart.setHours(0, 0, 0, 0);
     const weekStats = calculateProfitLoss(logs, weekStart, new Date());
     document.getElementById('this-week-ac').innerHTML = createACTable(weekStats);
 
-    // Today stats
     const dayStart = new Date();
     dayStart.setHours(0, 0, 0, 0);
     const dayStats = calculateProfitLoss(logs, dayStart, new Date());
     document.getElementById('today-ac').innerHTML = createACTable(dayStats);
 
-    // History logs
-    const historyContainer = document.getElementById('history-logs');
-    historyContainer.innerHTML = '';
-
-    const groupedLogs = logs.reduce((groups, log) => {
-        const date = new Date(log.datetime).toLocaleDateString();
-        if (!groups[date]) groups[date] = [];
-        groups[date].push(log);
-        return groups;
-    }, {});
-
-    Object.entries(groupedLogs)
-        .sort((a, b) => new Date(b[0]) - new Date(a[0]))
-        .forEach(([date, dayLogs]) => {
-            const dayStats = calculateProfitLoss(dayLogs);
-            const section = document.createElement('div');
-            section.innerHTML = `
-                <h4>${date}</h4>
-                ${createACTable(dayStats)}
-            `;
-            historyContainer.appendChild(section);
-        });
+    // Mistakes
+    renderMistakes();
 }
 
+function renderMistakes() {
+    // All time mistakes
+    const allTimeMistakes = getMistakes(logs);
+    document.getElementById('all-time-mistakes').innerHTML = createMistakesTable(allTimeMistakes);
 
+    // This week mistakes
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    const weekMistakes = getMistakes(logs, weekStart, new Date());
+    document.getElementById('week-mistakes').innerHTML = createMistakesTable(weekMistakes);
 
+    // Today mistakes
+    const dayStart = new Date();
+    dayStart.setHours(0, 0, 0, 0);
+    const todayMistakes = getMistakes(logs, dayStart, new Date());
+    document.getElementById('today-mistakes').innerHTML = createMistakesTable(todayMistakes);
+}
 
-// Event Handlers
+function createMistakesTable(mistakes) {
+    if (mistakes.length === 0) return '<p>No mistakes recorded</p>';
+
+    return `
+        <table>
+            <tr>
+                <th>Action</th>
+                <th>Count</th>
+                <th>Cost</th>
+            </tr>
+            ${mistakes.map(mistake => `
+                <tr>
+                    <td>${mistake.action}</td>
+                    <td>${mistake.count}</td>
+                    <td>${mistake.count * mistake.multiplier}</td>
+                </tr>
+            `).join('')}
+        </table>
+    `;
+}
+
+// Event Handlers and Initialization
 function addLogEntry(action, isAngel) {
-    const count = logs.filter(log => log.action === action).length;
-    const actionConfig = isAngel ? 
-        angels.find(a => a.action === action) : 
-        demons.find(d => d.action === action);
-
-    if (count >= actionConfig.maxOccurrence) {
-        alert(`Warning: Maximum occurrence (${actionConfig.maxOccurrence}) reached for "${action}"`);
-    }
-
     const log = {
         datetime: getNYDateTime(),
         action,
@@ -1064,79 +919,126 @@ function addLogEntry(action, isAngel) {
     renderActionTables();
     updateScore();
     updateStats();
+    updateACTables();
 }
 
 function showScreen(screenName) {
-    document.querySelectorAll('.screen').forEach(screen => {
-        screen.style.display = 'none';
+    const screens = ['main', 'config', 'howto', 'stats'];
+    screens.forEach(screen => {
+        document.querySelector(`.${screen}-screen`).style.display = 'none';
     });
     document.querySelector(`.${screenName}-screen`).style.display = 'block';
 }
 
-// Initialize main screen as visible
-document.querySelector('.main-screen').style.display = 'block';
-
 // Event Listeners
-document.querySelectorAll('.main-toggle').forEach(button => {
-    button.addEventListener('click', () => showScreen('main'));
-});
+document.addEventListener('DOMContentLoaded', function() {
+    // Screen navigation
+    document.querySelectorAll('.main-toggle').forEach(button => {
+        button.addEventListener('click', () => showScreen('main'));
+    });
 
-document.querySelector('.config-toggle').addEventListener('click', () => {
-    showScreen('config');
-    renderConfigTables();
-});
+    document.querySelector('.config-toggle').addEventListener('click', () => {
+        showScreen('config');
+        renderConfigTables();
+    });
 
-document.querySelector('.howto-toggle').addEventListener('click', () => {
-    showScreen('howto');
-});
+    document.querySelector('.howto-toggle').addEventListener('click', () => {
+        showScreen('howto');
+    });
 
-document.querySelector('.stats-toggle').addEventListener('click', () => {
-    showScreen('stats');
-    updateStats();
-});
-
-document.getElementById('add-angel').addEventListener('click', () => {
-    angels.push({ action: 'New Angel', multiplier: 1, maxOccurrence: 2 });
-    saveState();
-    renderConfigTables();
-    renderActionTables();
-});
-
-document.getElementById('add-demon').addEventListener('click', () => {
-    demons.push({ action: 'New Demon', multiplier: 1, maxOccurrence: 2 });
-    saveState();
-    renderConfigTables();
-    renderActionTables();
-});
-
-document.getElementById('clear-logs').addEventListener('click', () => {
-    if (confirm('Are you sure you want to clear all logs?')) {
-        logs = [];
-        saveState();
-        renderLogs();
-        renderActionTables();
-        updateScore();
+    document.querySelector('.stats-toggle').addEventListener('click', () => {
+        showScreen('stats');
         updateStats();
+        updateACTables();
+    });
+
+    document.getElementById('add-angel').addEventListener('click', () => {
+        const newAngel = { action: 'New Angel', multiplier: 1, maxOccurrence: 2 };
+        angels.push(newAngel);
+        saveState();
+        renderConfigTables();
+        renderActionTables();
+    });
+
+    document.getElementById('add-demon').addEventListener('click', () => {
+        const newDemon = { action: 'New Demon', multiplier: 1, maxOccurrence: 2 };
+        demons.push(newDemon);
+        saveState();
+        renderConfigTables();
+        renderActionTables();
+    });
+
+    document.getElementById('clear-logs').addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear all logs?')) {
+            logs = [];
+            saveState();
+            renderLogs();
+            renderActionTables();
+            updateScore();
+            updateStats();
+            updateACTables();
+        }
+    });
+
+    document.getElementById('export-csv').addEventListener('click', exportToCSV);
+
+    document.getElementById('history-date').addEventListener('change', function(e) {
+        const selectedDate = new Date(e.target.value);
+        const nextDate = new Date(selectedDate);
+        nextDate.setDate(nextDate.getDate() + 1);
+
+        const dayLogs = logs.filter(log => {
+            const logDate = new Date(log.datetime);
+            return logDate >= selectedDate && logDate < nextDate;
+        });
+
+        const historyContainer = document.getElementById('history-logs');
+        historyContainer.innerHTML = '';
+        
+        if (dayLogs.length === 0) {
+            historyContainer.innerHTML = '<p>No logs for this date</p>';
+            return;
+        }
+
+        const stats = calculateProfitLoss(dayLogs);
+        const section = document.createElement('div');
+        section.innerHTML = createACTable(stats);
+        historyContainer.appendChild(section);
+
+        dayLogs.forEach(log => {
+            const isAngel = angels.find(a => a.action === log.action);
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span>${new Date(log.datetime).toLocaleTimeString('en-US', { hour12: false })}</span>
+                <span>${log.action}</span>
+                <span>${log.note}</span>
+                <span>${isAngel ? '💪' : '👎'}</span>
+                <span>${log.lucky ? 'Lucky' : 'Unlucky'}</span>
+            `;
+            historyContainer.appendChild(logEntry);
+        });
+    });
+
+    // Initialize
+    function updateClock() {
+        document.getElementById('ny-time').textContent = getNYTime();
+        document.getElementById('session-message').textContent = getSessionMessage();
     }
+
+    // Set today's date as default in date picker
+    const today = new Date();
+    document.getElementById('history-date').value = today.toISOString().split('T')[0];
+
+    // Start the app
+    showScreen('main');
+    renderActionTables();
+    renderConfigTables();
+    renderLogs();
+    updateScore();
+    updateStats();
+    updateACTables();
+    updateClock();
+    setInterval(updateClock, 60000);
 });
-
-document.getElementById('export-csv').addEventListener('click', exportToCSV);
-
-// Initialize
-function updateClock() {
-    document.getElementById('ny-time').textContent = getNYTime();
-    document.getElementById('session-message').textContent = getSessionMessage();
-}
-
-// Start the app
-renderActionTables();
-renderConfigTables();
-renderLogs();
-updateScore();
-updateStats();
-updateClock();
-setInterval(updateClock, 60000);
-
-
-
 </script>
